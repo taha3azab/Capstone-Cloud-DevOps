@@ -1,1 +1,1 @@
-# Capstone-Cloud-DevOps
+# Capstone Cloud DevOps
