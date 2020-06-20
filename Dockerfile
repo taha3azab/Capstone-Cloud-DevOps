@@ -3,7 +3,7 @@ FROM node:lts-slim as node
 LABEL MAINTAINER Taha Azab <azab.taha@gmail.com>
 
 WORKDIR /app
-COPY app/capstone-app/package*.json .
+COPY app/capstone-app/package*.json ./
 RUN npm ci --only=production
 COPY app/capstone-app .
 RUN npm run build -- --prod

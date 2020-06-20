@@ -3,3 +3,4 @@ out
 dist
 .cache
 .eslintcache
+npm-debug.log
