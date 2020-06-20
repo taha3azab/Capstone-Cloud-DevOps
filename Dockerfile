@@ -4,7 +4,7 @@ LABEL MAINTAINER Taha Azab <azab.taha@gmail.com>
 
 WORKDIR /app
 COPY app/capstone-app/package*.json ./
-RUN npm install
+RUN npm install --verbose
 COPY app/capstone-app .
 RUN npm run build -- --prod
 
