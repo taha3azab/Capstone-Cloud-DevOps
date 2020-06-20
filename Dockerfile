@@ -1,4 +1,4 @@
-FROM node:14.4.0-alpine as node
+FROM node:lts-slim as node
 
 LABEL MAINTAINER Taha Azab <azab.taha@gmail.com>
 
