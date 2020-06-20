@@ -5,16 +5,6 @@ pipeline {
     }
     agent any
     stages {
-        // stage('Hashing Image') {
-        //     steps {
-        //         script {
-        //             env.GIT_HASH = sh(
-        //                 script: "git show --oneline | head -1 | cut -d' ' -f1",
-        //                 returnStdout: true
-        //             ).trim()
-        //         }
-        //     }
-        // }
         stage('Lint Dockerfile') {
             agent {
                 docker {
@@ -53,7 +43,12 @@ pipeline {
         }
         stage('Build Docker Container') {
             steps {
-                sh 'docker run --name capstone -d -p 80:80 taha3azab/capstone-app:$BUILD_NUMBER'
+                sh 'docker run --name capstone -d -p 80:80 $registry:$BUILD_NUMBER'
+            }
+        }        
+        stage('Remove Unused docker image') {
+            steps{
+                sh "docker rmi $registry:$BUILD_NUMBER"
             }
         }
         stage("Cleaning Docker up") {
