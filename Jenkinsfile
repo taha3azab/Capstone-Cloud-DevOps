@@ -41,12 +41,12 @@ pipeline {
         }
         stage('Scan Dockerfile to find vulnerabilities') {
             steps {
-                aquaMicroscanner(imageName: 'taha3azab/capstone-app', notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
+                aquaMicroscanner(imageName: 'taha3azab/capstone-app:${env.GIT_HASH}', notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
             }
         }
         stage('Build Docker Container') {
             steps {
-                sh 'docker run --name capstone -d -p 80:80 taha3azab/capstone-app'
+                sh 'docker run --name capstone -d -p 80:80 taha3azab/capstone-app${env.GIT_HASH}'
             }
         }
         stage("Cleaning Docker up") {
