@@ -1,0 +1,50 @@
+Description: >
+  Capstone project for Cloud DevOps Engineering Nanodegree
+  Author - Taha Azab
+  Creating the EKS cluster.
+
+Parameters:
+  EnvironmentName:
+    Description: An Environment name that will be prefixed to resources
+    Type: String
+
+Resources:
+  EKSClusterInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      RoleName: !Join ["-", [!Ref "EnvironmentName", "EKS-Cluster-Role"]]
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+        - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
+
+  EKSCluster:
+    Type: "AWS::EKS::Cluster"
+    Properties:
+      Name: !Join ["", [!Ref "EnvironmentName", "-EKS-Cluster"]]
+      Version: 1.14
+      RoleArn: !GetAtt EKSClusterInstanceRole.Arn
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub "${EnvironmentName}-SCG"
+        SubnetIds:
+          - Fn::ImportValue: !Sub "${EnvironmentName}-SUBNET1"
+          - Fn::ImportValue: !Sub "${EnvironmentName}-SUBNET2"
+          - Fn::ImportValue: !Sub "${EnvironmentName}-SUBNET3"
+
+Outputs:
+  KubernetesCluster:
+    Description: The Kubernetes Cluster Name
+    Value: !Ref EKSCluster
+    Export:
+      Name: !Sub "${EnvironmentName}-Cluster"

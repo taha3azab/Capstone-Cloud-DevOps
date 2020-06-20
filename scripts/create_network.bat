@@ -1,0 +1,1 @@
+aws cloudformation create-stack --stack-name udacity-capstone-network --template-body file://../aws/network.cf.yml  --parameters file://../aws/network-params.json --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" --region=us-east-1 --profile default

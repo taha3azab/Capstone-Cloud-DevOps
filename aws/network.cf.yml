@@ -1,0 +1,183 @@
+Description: >
+  Capstone project for Cloud DevOps Engineering Nanodegree
+  Author - Taha Azab
+  Creating the infrastructure for EKS cluster deployment.
+
+Parameters:
+  EnvironmentName:
+    Description: An Environment name that will be prefixed to resources
+    Type: String
+  VpcCIDR:
+    Type: String
+    Default: 10.0.0.0/16
+    Description: The CIDR range for the VPC. This should be a valid private (RFC 1918) CIDR range.
+  Subnet1CIDR:
+    Type: String
+    Default: 10.0.0.0/24
+    Description: CidrBlock for subnet 01 within the VPC
+  Subnet2CIDR:
+    Type: String
+    Default: 10.0.1.0/24
+    Description: CidrBlock for subnet 02 within the VPC
+  Subnet3CIDR:
+    Type: String
+    Default: 10.0.2.0/24
+    Description: CidrBlock for subnet 03 within the VPC
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Worker Network Configuration"
+        Parameters:
+          - VpcCIDR
+          - Subnet1CIDR
+          - Subnet2CIDR
+          - Subnet3CIDR
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-VPC"
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-igw"
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Network
+          Value: Public
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-route-table
+
+  Route:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet1CIDR
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-Subnet-1
+  Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet2CIDR
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-Subnet-2
+  Subnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [2, !GetAZs ""]
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet3CIDR
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-Subnet-3
+
+  Subnet1RTAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Subnet1
+      RouteTableId: !Ref RouteTable
+
+  Subnet2RTAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Subnet2
+      RouteTableId: !Ref RouteTable
+
+  Subnet3RTAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Subnet3
+      RouteTableId: !Ref RouteTable
+
+  EKSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Cluster network to worker nodes
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 1025
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 1025
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  VPCID:
+    Description: The VPCId of VPC
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${EnvironmentName}-VPCID
+
+  SubnetID1:
+    Description: The subnetId of subnet 1
+    Value: !Ref Subnet1
+    Export:
+      Name: !Sub ${EnvironmentName}-SUBNET1
+
+  SubnetID2:
+    Description: The subnetId of subnet 2
+    Value: !Ref Subnet2
+    Export:
+      Name: !Sub ${EnvironmentName}-SUBNET2
+
+  SubnetID3:
+    Description: The subnetId of subnet 3
+    Value: !Ref Subnet2
+    Export:
+      Name: !Sub ${EnvironmentName}-SUBNET3
+
+  SubnetIds:
+    Description: Subnets from VPC
+    Value: !Join [",", [!Ref Subnet1, !Ref Subnet2, !Ref Subnet3]]
+    Export:
+      Name: !Sub ${EnvironmentName}-SBN-IDS
+
+  SecurityGroup:
+    Description: Cluster security group.
+    Value: !Ref EKSSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-SCG
+
+  SecurityGroups:
+    Description: Security group for the EKS
+    Value: !Join [",", [!Ref EKSSecurityGroup]]
