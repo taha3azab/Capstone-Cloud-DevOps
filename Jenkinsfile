@@ -1,23 +1,24 @@
 pipeline {
     environment {
-        dockerhubCredentials = 'docker-hub-credentials'
+        registry = "taha3azab/capstone-app"
+        registryCredential = 'docker-hub-credentials'
     }
     agent any
     stages {
-        stage('Hashing images') {
-            steps {
-                script {
-                    env.GIT_HASH = sh(
-                        script: "git show --oneline | head -1 | cut -d' ' -f1",
-                        returnStdout: true
-                    ).trim()
-                }
-            }
-        }
+        // stage('Hashing Image') {
+        //     steps {
+        //         script {
+        //             env.GIT_HASH = sh(
+        //                 script: "git show --oneline | head -1 | cut -d' ' -f1",
+        //                 returnStdout: true
+        //             ).trim()
+        //         }
+        //     }
+        // }
         stage('Lint Dockerfile') {
             agent {
                 docker {
-                image 'hadolint/hadolint:latest-debian'
+                    image 'hadolint/hadolint:latest-debian'
                 }
             }
             post {
@@ -29,11 +30,17 @@ pipeline {
                 sh 'hadolint ./Dockerfile | tee -a hadolint_lint.txt'
             }
         }
-        stage('Build & Push to dockerhub') {
-            steps {
+        stage('Building Image') {
+            steps{
                 script {
-                    dockerImage = docker.build("taha3azab/capstone-app:${env.GIT_HASH}")
-                    docker.withRegistry('', dockerhubCredentials) {
+                    docker.build registry + ":$BUILD_NUMBER"
+                }
+            }
+        }
+        stage('Deploy Image') {
+            steps{
+                script {
+                    docker.withRegistry('', registryCredential) {
                         dockerImage.push()
                     }
                 }
@@ -41,12 +48,12 @@ pipeline {
         }
         stage('Scan Dockerfile to find vulnerabilities') {
             steps {
-                aquaMicroscanner(imageName: 'taha3azab/capstone-app:${env.GIT_HASH}', notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
+                aquaMicroscanner(imageName: registry +':$BUILD_NUMBER', notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
             }
         }
         stage('Build Docker Container') {
             steps {
-                sh 'docker run --name capstone -d -p 80:80 taha3azab/capstone-app${env.GIT_HASH}'
+                sh 'docker run --name capstone -d -p 80:80 taha3azab/capstone-app:$BUILD_NUMBER'
             }
         }
         stage("Cleaning Docker up") {
