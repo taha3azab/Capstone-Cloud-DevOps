@@ -1,7 +1,7 @@
 pipeline {
     environment {
         registry = "taha3azab/capstone-app"
-        registryCredential = 'docker-hub-credentials'
+        registryCredential = 'dockerhubcredentials'
     }
     agent any
     stages {
