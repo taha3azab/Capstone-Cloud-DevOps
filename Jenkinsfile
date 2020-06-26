@@ -30,25 +30,9 @@ pipeline {
                 }
             }
         }
-        // stage('Building Image') {
-        //     steps{
-        //         script {
-        //             docker.build registry + ":$BUILD_NUMBER"
-        //         }
-        //     }
-        // }
-        // stage('Deploy Image') {
-        //     steps{
-        //         script {
-        //             docker.withRegistry('', registryCredential) {
-        //                 dockerImage.push()
-        //             }
-        //         }
-        //     }
-        // }
         stage('Scan Dockerfile to find vulnerabilities') {
             steps {
-                aquaMicroscanner(imageName: registry +':$BUILD_NUMBER', notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
+                aquaMicroscanner(imageName: registry +':${BUILD_NUMBER}', notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
             }
         }
         stage('Build Docker Container') {
