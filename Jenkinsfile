@@ -42,12 +42,12 @@ pipeline {
         }
         stage('Scan Dockerfile to find vulnerabilities') {
             steps {
-                aquaMicroscanner(imageName: registry +':'+ env.GIT_HASH, notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
+                aquaMicroscanner(imageName: registry + ':' + env.GIT_HASH, notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
             }
         }
         stage('Build Docker Container') {
             steps {
-                sh 'docker run --name capstone -d -p 80:80 $registry:${env.GIT_HASH}'
+                sh 'docker run --name capstone -d -p 80:80 ' + registry + ':' + env.GIT_HASH
             }
         }        
         stage('Remove Unused docker image') {
