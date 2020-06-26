@@ -20,22 +20,32 @@ pipeline {
                 sh 'hadolint ./Dockerfile | tee -a hadolint_lint.txt'
             }
         }
-        stage('Building Image') {
-            steps{
+        stage('Build & Push to dockerhub') {
+            steps {
                 script {
-                    docker.build registry + ":$BUILD_NUMBER"
-                }
-            }
-        }
-        stage('Deploy Image') {
-            steps{
-                script {
+                    dockerImage = docker.build(registry + ":$BUILD_NUMBER")
                     docker.withRegistry('', registryCredential) {
                         dockerImage.push()
                     }
                 }
             }
         }
+        // stage('Building Image') {
+        //     steps{
+        //         script {
+        //             docker.build registry + ":$BUILD_NUMBER"
+        //         }
+        //     }
+        // }
+        // stage('Deploy Image') {
+        //     steps{
+        //         script {
+        //             docker.withRegistry('', registryCredential) {
+        //                 dockerImage.push()
+        //             }
+        //         }
+        //     }
+        // }
         stage('Scan Dockerfile to find vulnerabilities') {
             steps {
                 aquaMicroscanner(imageName: registry +':$BUILD_NUMBER', notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
