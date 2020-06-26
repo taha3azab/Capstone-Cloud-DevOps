@@ -1,17 +1,10 @@
-FROM node:lts-slim as node
+FROM nginx:alpine
 
 LABEL MAINTAINER Taha Azab <azab.taha@gmail.com>
 
-WORKDIR /app
-COPY app/capstone-app/package.json package.json
-RUN npm install --force --verbose
-COPY app/capstone-app .
-RUN npm run build -- --prod
-
-FROM nginx:alpine
 RUN rm -rf /usr/share/nginx/html/*
 VOLUME /var/cache/nginx
-COPY --from=node /app/dist/capstone-app /usr/share/nginx/html
+COPY app/capstone-app  /usr/share/nginx/html
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
 WORKDIR /usr/share/nginx/html
