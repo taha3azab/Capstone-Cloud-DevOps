@@ -42,7 +42,7 @@ pipeline {
         }
         stage('Scan Dockerfile to find vulnerabilities') {
             steps {
-                aquaMicroscanner(imageName: registry +':${env.GIT_HASH}', notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
+                aquaMicroscanner(imageName: registry +':'+ env.GIT_HASH, notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
             }
         }
         stage('Build Docker Container') {
