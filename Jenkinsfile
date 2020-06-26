@@ -5,6 +5,16 @@ pipeline {
     }
     agent any
     stages {
+        stage('Hashing images') {
+            steps {
+                script {
+                    env.GIT_HASH = sh(
+                        script: "git show --oneline | head -1 | cut -d' ' -f1",
+                        returnStdout: true
+                    ).trim()
+                }
+            }
+        }
         stage('Lint Dockerfile') {
             agent {
                 docker {
@@ -23,7 +33,7 @@ pipeline {
         stage('Build & Push to dockerhub') {
             steps {
                 script {
-                    dockerImage = docker.build(registry + ":$BUILD_NUMBER")
+                    dockerImage = docker.build(registry + ":${env.GIT_HASH}")
                     docker.withRegistry('', registryCredential) {
                         dockerImage.push()
                     }
@@ -32,17 +42,17 @@ pipeline {
         }
         stage('Scan Dockerfile to find vulnerabilities') {
             steps {
-                aquaMicroscanner(imageName: registry +':${BUILD_NUMBER}', notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
+                aquaMicroscanner(imageName: registry +':${env.GIT_HASH}', notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
             }
         }
         stage('Build Docker Container') {
             steps {
-                sh 'docker run --name capstone -d -p 80:80 $registry:$BUILD_NUMBER'
+                sh 'docker run --name capstone -d -p 80:80 $registry:${env.GIT_HASH}'
             }
         }        
         stage('Remove Unused docker image') {
             steps{
-                sh "docker rmi $registry:$BUILD_NUMBER"
+                sh "docker rmi $registry:${env.GIT_HASH}"
             }
         }
         stage("Cleaning Docker up") {
