@@ -49,7 +49,7 @@ pipeline {
                 aquaMicroscanner(imageName: registry + ":" + env.GIT_HASH, notCompliesCmd: "exit 4", onDisallowed: "fail", outputFormat: "html")
             }
         }
-        stage('Build Docker Container') {
+        stage('Run Docker Container') {
             steps {
                 sh "docker run --name capstone -d -p 80:80 $registry:${env.GIT_HASH}"
             }
@@ -57,6 +57,15 @@ pipeline {
         stage('Remove Unused docker image') {
             steps{
                 sh "docker rmi $registry:${env.GIT_HASH}"
+            }
+        }
+        stage("Cleaning Docker") {
+            steps {
+                script {
+                    sh "echo 'Cleaning Docker'"
+                    sh "docker stop capstone"
+                    sh "docker system prune -f"
+                }
             }
         }
         stage('Deploy to EKS') {
@@ -69,15 +78,6 @@ pipeline {
                             sh 'kubectl apply -f load-balancer.yml'
                         }
                     }
-            }
-        }
-        stage("Cleaning Docker") {
-            steps {
-                script {
-                    sh "echo 'Cleaning Docker'"
-                    sh "docker stop capstone"
-                    sh "docker system prune -f"
-                }
             }
         }
   }
