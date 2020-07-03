@@ -75,6 +75,7 @@ pipeline {
             steps {
                 script {
                     sh "echo 'Cleaning Docker'"
+                    sh "docker stop capstone"
                     sh "docker system prune -f"
                 }
             }
