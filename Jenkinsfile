@@ -52,7 +52,6 @@ pipeline {
         stage('Build Docker Container') {
             steps {
                 sh "docker run --name capstone -d -p 80:80 $registry:${env.GIT_HASH}"
-                sh "docker run --name capstone -d -p 80:80 $registry:latest"
             }
         }        
         stage('Remove Unused docker image') {
