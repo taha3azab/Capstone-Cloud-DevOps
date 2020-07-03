@@ -27,6 +27,13 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
         - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
         - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
+  
+  ClusterInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref EKSClusterInstanceRole
 
   EKSCluster:
     Type: "AWS::EKS::Cluster"
@@ -44,7 +51,13 @@ Resources:
 
 Outputs:
   KubernetesCluster:
-    Description: The Kubernetes Cluster Name
+    Description: The Kubernetes Cluster
     Value: !Ref EKSCluster
     Export:
       Name: !Sub "${EnvironmentName}-Cluster"
+  
+  EKSRoleArn:
+    Description: The role that Amazon EKS will use to create AWS resources for Kubernetes clusters
+    Value: !GetAtt EKSClusterInstanceRole.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-EKSRoleArn"

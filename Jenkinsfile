@@ -2,6 +2,8 @@ pipeline {
     environment {
         registry = "taha3azab/capstone-app"
         registryCredential = 'dockerhubcredentials'
+        awsCredential = 'aws-credentials'
+        awsRegion = 'us-east-1'
     }
     agent any
     stages {
@@ -34,20 +36,23 @@ pipeline {
             steps {
                 script {
                     dockerImage = docker.build(registry + ":${env.GIT_HASH}")
+                    dockerImageLatest = docker.build(registry + ":latest")
                     docker.withRegistry('', registryCredential) {
                         dockerImage.push()
+                        dockerImageLatest.push()
                     }
                 }
             }
         }
         stage('Scan Dockerfile to find vulnerabilities') {
             steps {
-                aquaMicroscanner(imageName: registry + ':' + env.GIT_HASH, notCompliesCmd: 'exit 4', onDisallowed: 'fail', outputFormat: 'html')
+                aquaMicroscanner(imageName: registry + ":" + env.GIT_HASH, notCompliesCmd: "exit 4", onDisallowed: "fail", outputFormat: "html")
             }
         }
         stage('Build Docker Container') {
             steps {
-                sh 'docker run --name capstone -d -p 80:80 ' + registry + ':' + env.GIT_HASH
+                sh "docker run --name capstone -d -p 80:80 $registry:${env.GIT_HASH}"
+                sh "docker run --name capstone -d -p 80:80 $registry:latest"
             }
         }        
         stage('Remove Unused docker image') {
@@ -55,10 +60,22 @@ pipeline {
                 sh "docker rmi $registry:${env.GIT_HASH}"
             }
         }
-        stage("Cleaning Docker up") {
+        stage('Deploy to EKS') {
+            steps {
+                dir('kubernetes') {
+                    withAWS(credentials: awsCredential, region: awsRegion) {
+                            sh "aws eks --region $awsRegion update-kubeconfig --name capstone"
+                            sh 'kubectl apply -f deployment.yml'
+                            sh 'kubectl apply -f service.yml'
+                            sh 'kubectl apply -f load-balancer.yml'
+                        }
+                    }
+            }
+        }
+        stage("Cleaning Docker") {
             steps {
                 script {
-                    sh "echo 'Cleaning Docker up'"
+                    sh "echo 'Cleaning Docker'"
                     sh "docker system prune"
                 }
             }

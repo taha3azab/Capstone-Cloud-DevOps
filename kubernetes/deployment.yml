@@ -1,0 +1,35 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: capstone-app
+  labels:
+    app: capstone-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: capstone-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: capstone-app
+    spec:
+      containers:
+      - name: capstone-app
+        image: taha3azab/capstone-app:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: 64Mi
+            cpu: 250m
+          requests:
+            memory: 32Mi
+            cpu: 200m
+        ports:
+          - containerPort: 80
