@@ -51,12 +51,12 @@ pipeline {
         }
         stage('Run Docker Container') {
             steps {
-                sh 'docker run --name capstone -d -p 80:80 $registry:${env.GIT_HASH}'
+                sh "docker run --name capstone -d -p 80:80 $registry:${env.GIT_HASH}"
             }
         }        
         stage('Remove Unused docker image') {
             steps{
-                sh 'docker rmi $registry:${env.GIT_HASH}'
+                sh "docker rmi $registry:${env.GIT_HASH}"
             }
         }
         stage('Cleaning Docker') {
