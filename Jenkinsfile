@@ -17,13 +17,6 @@ pipeline {
                 }
             }
         }
-        stage('Lint HTML') {
-            steps{
-                dir('app/capstone-app') {
-                    sh 'tidy -q -e *.html'
-                }
-            }
-        }
         stage('Lint Dockerfile') {
             agent {
                 docker {
