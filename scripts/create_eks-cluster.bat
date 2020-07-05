@@ -1,0 +1,1 @@
+aws cloudformation create-stack --stack-name udacity-capstone-eks --template-body file://../aws/eks-cluster.cf.yml --parameters file://../aws/eks-cluster-params.json --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" --region=us-east-1 --profile default

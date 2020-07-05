@@ -110,12 +110,12 @@ Resources:
           Value: !Sub
             - "${EksId}-CapstoneNodesGroup-Node"
             - EksId:
-                Fn::ImportValue: !Sub "${EnvironmentName}-EKS"
+                Fn::ImportValue: !Sub "${EnvironmentName}-Cluster"
           PropagateAtLaunch: "true"
         - Key: !Sub
             - "kubernetes.io/cluster/${EksId}"
             - EksId:
-                Fn::ImportValue: !Sub "${EnvironmentName}-EKS"
+                Fn::ImportValue: !Sub "${EnvironmentName}-Cluster"
           Value: "owned"
           PropagateAtLaunch: "true"
     UpdatePolicy:
@@ -130,7 +130,7 @@ Resources:
       AssociatePublicIpAddress: "true"
       IamInstanceProfile: !Ref InstanceProfile
       ImageId: !Ref ImageID
-      InstanceType: t2.medium
+      InstanceType: t2.micro
       KeyName: !Ref KeyPairName
       SecurityGroups:
         - !Ref NodesSecurityGroup
@@ -151,7 +151,7 @@ Resources:
                      --resource NodesAutoScalingGroup  \
                      --region ${AWS::Region}
           - EksId:
-              Fn::ImportValue: !Sub "${EnvironmentName}-EKS"
+              Fn::ImportValue: !Sub "${EnvironmentName}-Cluster"
 
 Outputs:
   InstanceRole:

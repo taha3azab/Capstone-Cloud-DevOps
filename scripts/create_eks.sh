@@ -1,1 +1,0 @@
-aws cloudformation create-stack --stack-name udacity-capstone-eks --template-body file://../aws/eks-cluster.yml --parameters file://../aws/eks-cluster-params.json

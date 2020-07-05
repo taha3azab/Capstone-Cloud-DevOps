@@ -39,7 +39,7 @@ Resources:
     Type: "AWS::EKS::Cluster"
     Properties:
       Name: !Join ["", [!Ref "EnvironmentName", "-EKS-Cluster"]]
-      Version: 1.14
+      Version: 1.16
       RoleArn: !GetAtt EKSClusterInstanceRole.Arn
       ResourcesVpcConfig:
         SecurityGroupIds:
@@ -55,7 +55,6 @@ Outputs:
     Value: !Ref EKSCluster
     Export:
       Name: !Sub "${EnvironmentName}-Cluster"
-  
   EKSRoleArn:
     Description: The role that Amazon EKS will use to create AWS resources for Kubernetes clusters
     Value: !GetAtt EKSClusterInstanceRole.Arn

@@ -1,6 +1,4 @@
-@echo off
-
-docker build --tag=taha3azab/capstone-app:latest -f ./src/capstone-app/Dockerfile  ./src/capstone-app
+docker build --tag=taha3azab/capstone-app:latest -f ../Dockerfile  ../app/capstone-app
 
 docker image ls
 

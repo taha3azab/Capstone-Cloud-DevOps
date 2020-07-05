@@ -17,6 +17,11 @@ pipeline {
                 }
             }
         }
+        stage('Lint HTML') {
+            steps {
+                sh 'tidy -q -e ./app/capstone-app/*.html'
+            }
+        }
         stage('Lint Dockerfile') {
             agent {
                 docker {
@@ -51,15 +56,15 @@ pipeline {
         }
         stage('Run Docker Container') {
             steps {
-                sh "docker run --name capstone -d -p 80:80 $registry:${env.GIT_HASH}"
+                sh 'docker run --name capstone -d -p 80:80 $registry:${env.GIT_HASH}'
             }
         }        
         stage('Remove Unused docker image') {
             steps{
-                sh "docker rmi $registry:${env.GIT_HASH}"
+                sh 'docker rmi $registry:${env.GIT_HASH}'
             }
         }
-        stage("Cleaning Docker") {
+        stage('Cleaning Docker') {
             steps {
                 script {
                     sh "echo 'Cleaning Docker'"
@@ -72,7 +77,7 @@ pipeline {
             steps {
                 dir('kubernetes') {
                     withAWS(credentials: awsCredential, region: awsRegion) {
-                            sh "aws eks --region $awsRegion update-kubeconfig --name capstone"
+                            sh 'aws eks --region $awsRegion update-kubeconfig --name UdacityCapstoneProject-EKS-Cluster'
                             sh 'kubectl apply -f deployment.yml'
                             sh 'kubectl apply -f service.yml'
                             sh 'kubectl apply -f load-balancer.yml'
@@ -80,5 +85,5 @@ pipeline {
                     }
             }
         }
-  }
+    }
 }
