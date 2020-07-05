@@ -19,7 +19,9 @@ pipeline {
         }
         stage('Lint HTML') {
             steps{
-                sh "tidy -q -e *.html"
+                dir('app/capstone-app') {
+                    sh "tidy -q -e *.html"
+                }
             }
         }
         stage('Lint Dockerfile') {
