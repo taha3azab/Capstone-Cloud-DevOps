@@ -67,7 +67,7 @@ pipeline {
             steps {
                 echo 'Deploying to AWS...'
                 dir('kubernetes') {
-                    withAWS(region: 'us-east-1') {
+                    withAWS(region: 'us-east-1', profile: 'default') {
                         sh "aws eks --region $awsRegion update-kubeconfig --name UdacityCapstoneProject-EKS-Cluster"
                         sh "kubectl get all"
                         sh "kubectl apply -f deployment.yml"
