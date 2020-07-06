@@ -66,7 +66,7 @@ pipeline {
         stage('Deploy to EKS') {
             steps {
                 dir('kubernetes') {
-                    withAWS(credentials: ${awsCredentials}, region: ${awsRegion}) {
+                    withAWS(credentials: "${awsCredentials}", region: "${awsRegion}") {
                             sh "aws eks --region $awsRegion update-kubeconfig --name UdacityCapstoneProject-EKS-Cluster"
                             sh "kubectl get all"
                             sh "kubectl apply -f deployment.yml"
