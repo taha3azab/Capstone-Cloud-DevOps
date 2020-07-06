@@ -68,15 +68,13 @@ pipeline {
                 echo 'Deploying to AWS...'
                 dir('kubernetes') {
                     withAWS(region: 'us-east-1') {
-                        def identity = awsIdentity()
-                        echo identity
                         sh "aws eks --region $awsRegion update-kubeconfig --name UdacityCapstoneProject-EKS-Cluster"
                         sh "kubectl get all"
                         sh "kubectl apply -f deployment.yml"
                         sh "kubectl apply -f service.yml"
                         sh "kubectl apply -f load-balancer.yml"
-                        }
                     }
+                }
             }
         }
     }
