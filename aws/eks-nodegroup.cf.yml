@@ -1,7 +1,7 @@
 Description: >
-    Capstone project for Cloud DevOps Engineering Nanodegree
-    Author - Taha Azab
-    Creating the infrastructure for EKS cluster deployment.
+  Capstone project for Cloud DevOps Engineering Nanodegree
+  Author - Taha Azab
+  Creating the infrastructure for EKS cluster deployment.
 
 Parameters:
   EnvironmentName:

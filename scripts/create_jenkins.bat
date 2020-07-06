@@ -1,0 +1,1 @@
+aws cloudformation create-stack --stack-name udacity-capstone-jenkins --template-body file://../aws/capstone-jenkins.cf.yml  --parameters file://../aws/capstone-jenkins-params.json --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" --region=us-east-1 --profile default
