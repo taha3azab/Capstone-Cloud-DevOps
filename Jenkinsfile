@@ -73,6 +73,7 @@ pipeline {
                 dir('kubernetes') {
                     withAWS(credentials: awsCredential, region: awsRegion) {
                             sh "aws eks --region $awsRegion update-kubeconfig --name UdacityCapstoneProject-EKS-Cluster"
+                            sh "kubectl get all"
                             sh "kubectl apply -f deployment.yml"
                             sh "kubectl apply -f service.yml"
                             sh "kubectl apply -f load-balancer.yml"
