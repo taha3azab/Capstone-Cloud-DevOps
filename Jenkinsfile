@@ -44,11 +44,6 @@ pipeline {
                 }
             }
         }
-        // stage('Scan Dockerfile to find vulnerabilities') {
-        //     steps {
-        //         aquaMicroscanner(imageName: registry + ":" + env.GIT_HASH, notCompliesCmd: "exit 4", onDisallowed: "fail", outputFormat: "html")
-        //     }
-        // }
         stage('Run Docker Container') {
             steps {
                 sh "docker run --name capstone -d -p 80:80 $registry:${env.GIT_HASH}"
@@ -73,7 +68,7 @@ pipeline {
                 dir('kubernetes') {
                     withAWS(credentials: awsCredential, region: awsRegion) {
                             sh "aws eks --region $awsRegion update-kubeconfig --name UdacityCapstoneProject-EKS-Cluster"
-                            sh "kubectl get all"
+                            sh "kubectl get all --kubeconfig /var/lib/jenkins/.kube/config"
                             sh "kubectl apply -f deployment.yml"
                             sh "kubectl apply -f service.yml"
                             sh "kubectl apply -f load-balancer.yml"
