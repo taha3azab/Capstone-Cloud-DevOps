@@ -2,7 +2,7 @@ pipeline {
     environment {
         registry = "taha3azab/capstone-app"
         registryCredential = 'dockerhubcredentials'
-        awsCredentials = 'aws-credentials'
+        awsCredentials = 'aws-credentials2'
         awsRegion = 'us-east-1'
     }
     agent any
