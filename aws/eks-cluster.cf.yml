@@ -38,20 +38,20 @@ Resources:
   EKSCluster:
     Type: "AWS::EKS::Cluster"
     Properties:
-      Name: !Join ["", [!Ref "EnvironmentName", "-EKS-Cluster"]]
       Version: 1.16
+      Name: !Join ["", [!Ref "EnvironmentName", "-Cluster"]]
       RoleArn: !GetAtt EKSClusterInstanceRole.Arn
       ResourcesVpcConfig:
         SecurityGroupIds:
           - Fn::ImportValue: !Sub "${EnvironmentName}-SCG"
         SubnetIds:
-          - Fn::ImportValue: !Sub "${EnvironmentName}-SUBNET1"
-          - Fn::ImportValue: !Sub "${EnvironmentName}-SUBNET2"
-          - Fn::ImportValue: !Sub "${EnvironmentName}-SUBNET3"
+          Fn::Split: 
+            - ","
+            - Fn::ImportValue: !Sub "${EnvironmentName}-SUBNETS"
 
 Outputs:
-  KubernetesCluster:
-    Description: The Kubernetes Cluster
+  EKSClusterId:
+    Description: The Kubernetes Cluster Id.
     Value: !Ref EKSCluster
     Export:
       Name: !Sub "${EnvironmentName}-Cluster"

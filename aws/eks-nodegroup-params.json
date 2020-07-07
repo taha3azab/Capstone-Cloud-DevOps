@@ -9,7 +9,7 @@
   },
   {
     "ParameterKey": "DesiredInstances",
-    "ParameterValue": "1"
+    "ParameterValue": "3"
   },
   {
     "ParameterKey": "ImageID",

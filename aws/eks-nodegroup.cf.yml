@@ -29,13 +29,6 @@ Parameters:
     Type: String
 
 Resources:
-  InstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Properties:
-      Path: "/"
-      Roles:
-        - !Ref InstanceRole
-
   InstanceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -53,6 +46,13 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
         - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref InstanceRole
 
   NodesSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -103,8 +103,7 @@ Resources:
       VPCZoneIdentifier:
         Fn::Split:
           - ","
-          - Fn::ImportValue:
-              Fn::Sub: ${EnvironmentName}-SBN-IDS
+          - Fn::ImportValue: !Sub ${EnvironmentName}-SUBNETS
       Tags:
         - Key: Name
           Value: !Sub

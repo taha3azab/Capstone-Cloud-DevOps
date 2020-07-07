@@ -7,33 +7,26 @@ Parameters:
   EnvironmentName:
     Description: An Environment name that will be prefixed to resources
     Type: String
+  
   VpcCIDR:
+    Description: The CIDR range for the VPC. This should be a valid private (RFC 1918) CIDR range.
     Type: String
     Default: 10.0.0.0/16
-    Description: The CIDR range for the VPC. This should be a valid private (RFC 1918) CIDR range.
+    
   Subnet1CIDR:
+    Description: CidrBlock for subnet 01 within the VPC
     Type: String
     Default: 10.0.0.0/24
-    Description: CidrBlock for subnet 01 within the VPC
+  
   Subnet2CIDR:
+    Description: CidrBlock for subnet 02 within the VPC
     Type: String
     Default: 10.0.1.0/24
-    Description: CidrBlock for subnet 02 within the VPC
+  
   Subnet3CIDR:
+    Description: CidrBlock for subnet 03 within the VPC
     Type: String
     Default: 10.0.2.0/24
-    Description: CidrBlock for subnet 03 within the VPC
-
-Metadata:
-  AWS::CloudFormation::Interface:
-    ParameterGroups:
-      - Label:
-          default: "Worker Network Configuration"
-        Parameters:
-          - VpcCIDR
-          - Subnet1CIDR
-          - Subnet2CIDR
-          - Subnet3CIDR
 
 Resources:
   VPC:
@@ -52,28 +45,11 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub "${EnvironmentName}-igw"
-  AttachGateway:
+  InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
-
-  RouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Network
-          Value: Public
-        - Key: Name
-          Value: !Sub ${EnvironmentName}-route-table
-
-  Route:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref RouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
 
   Subnet1:
     Type: AWS::EC2::Subnet
@@ -81,50 +57,71 @@ Resources:
       AvailabilityZone: !Select [0, !GetAZs ""]
       VpcId: !Ref VPC
       CidrBlock: !Ref Subnet1CIDR
+      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-Subnet-1
+  
   Subnet2:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Select [1, !GetAZs ""]
       VpcId: !Ref VPC
       CidrBlock: !Ref Subnet2CIDR
+      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-Subnet-2
+  
   Subnet3:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Select [2, !GetAZs ""]
       VpcId: !Ref VPC
       CidrBlock: !Ref Subnet3CIDR
+      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-Subnet-3
 
-  Subnet1RTAssociation:
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-route-table
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  Subnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref Subnet1
-      RouteTableId: !Ref RouteTable
+      RouteTableId: !Ref PublicRouteTable
 
-  Subnet2RTAssociation:
+  Subnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref Subnet2
-      RouteTableId: !Ref RouteTable
+      RouteTableId: !Ref PublicRouteTable
 
-  Subnet3RTAssociation:
+  Subnet3RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref Subnet3
-      RouteTableId: !Ref RouteTable
+      RouteTableId: !Ref PublicRouteTable
 
-  EKSSecurityGroup:
+  DefaultSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Cluster network to worker nodes
+      GroupDescription: Default security group for the cluster
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -143,41 +140,44 @@ Resources:
 
 Outputs:
   VPCID:
-    Description: The VPCId of VPC
+    Description: The VPCId of VPC.
     Value: !Ref VPC
     Export:
       Name: !Sub ${EnvironmentName}-VPCID
+  
+  VPCPublicRouteTable:
+    Description: Public Routing.
+    Value: !Ref PublicRouteTable
+    Export:
+      Name: !Sub ${EnvironmentName}-PUB-RT
+
+  PublicSubnets:
+    Description: Subnets from VPC.
+    Value: !Join [",", [!Ref Subnet1, !Ref Subnet2, !Ref Subnet3]]
+    Export:
+      Name: !Sub ${EnvironmentName}-SUBNETS
 
   SubnetID1:
-    Description: The subnetId of subnet 1
+    Description: The subnetId of subnet 1.
     Value: !Ref Subnet1
     Export:
       Name: !Sub ${EnvironmentName}-SUBNET1
 
   SubnetID2:
-    Description: The subnetId of subnet 2
+    Description: The subnetId of subnet 2.
     Value: !Ref Subnet2
     Export:
       Name: !Sub ${EnvironmentName}-SUBNET2
 
   SubnetID3:
-    Description: The subnetId of subnet 3
+    Description: The subnetId of subnet 3.
     Value: !Ref Subnet2
     Export:
       Name: !Sub ${EnvironmentName}-SUBNET3
 
-  SubnetIds:
-    Description: Subnets from VPC
-    Value: !Join [",", [!Ref Subnet1, !Ref Subnet2, !Ref Subnet3]]
-    Export:
-      Name: !Sub ${EnvironmentName}-SBN-IDS
 
   SecurityGroup:
     Description: Cluster security group.
-    Value: !Ref EKSSecurityGroup
+    Value: !Ref DefaultSecurityGroup
     Export:
       Name: !Sub ${EnvironmentName}-SCG
-
-  SecurityGroups:
-    Description: Security group for the EKS
-    Value: !Join [",", [!Ref EKSSecurityGroup]]
