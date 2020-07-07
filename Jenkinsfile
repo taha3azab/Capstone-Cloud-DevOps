@@ -17,6 +17,13 @@ pipeline {
                 }
             }
         }
+        stage('Lint HTML') {
+            steps {
+                dir('app/capstone-app'){
+                sh 'tidy -q -e *.html'
+                }
+            }
+        }
         stage('Lint Dockerfile') {
             agent {
                 docker {
@@ -66,12 +73,13 @@ pipeline {
         stage('Deploy to EKS') {
             steps {
                 echo 'Deploying to AWS...'
-                withAWS(region: awsRegion, credentials: awsCredentials) {
-                    sh "aws eks --region $awsRegion update-kubeconfig --name UdacityCapstoneProject-EKS-Cluster"
-                    sh "kubectl get all"
-                    sh "kubectl apply -f ./kubernetes/deployment.yml"
-                    sh "kubectl apply -f ./kubernetes/service.yml"
-                    sh "kubectl apply -f ./kubernetes/load-balancer.yml"
+                dir('kubernetes') {
+                    withAWS(region: awsRegion, credentials: awsCredentials) {
+                        sh "aws eks --region $awsRegion update-kubeconfig --name UdacityCapstoneProject-EKS-Cluster"
+                        sh "kubectl apply -f deployment.yml"
+                        sh "kubectl apply -f service.yml"
+                        sh "kubectl apply -f load-balancer.yml"
+                    }
                 }
             }
         }
