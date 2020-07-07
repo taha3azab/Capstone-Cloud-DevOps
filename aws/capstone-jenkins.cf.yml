@@ -55,16 +55,15 @@ Resources:
           sudo apt-get update -y
           sudo apt-get install jenkins tidy -y
           sudo systemctl status jenkins
-          sudo cat /var/lib/jenkins/secrets/initialAdminPassword
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
           unzip awscliv2.zip
           sudo ./aws/install
           curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
           sudo mv /tmp/eksctl /usr/local/bin
-          curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.8/2020-04-16/bin/linux/arm64/kubectl
+          curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
           chmod +x ./kubectl
-          sudo mv ./kubectl /usr/local/bin
-          sudo usermod -aG docker $USER
+          sudo mv ./kubectl /usr/local/bin/kubectl
+          sudo usermod -aG docker ubuntu
           sudo usermod -aG docker jenkins
       SecurityGroupIds:
         - Ref: JenkinsSG
