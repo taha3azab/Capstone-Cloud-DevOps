@@ -18,10 +18,10 @@ pipeline {
             }
         }
         stage('Lint HTML') {
-            steps {
-                sh "tidy -q -e ./app/capstone-app/*.html"
-            }
-        }
+              steps {
+                  sh 'tidy -q -e *.html'
+              }
+         }
         stage('Lint Dockerfile') {
             agent {
                 docker {
