@@ -8,12 +8,12 @@
     "ParameterValue": "udacity-key-pair"
   },
   {
-    "ParameterKey": "DesiredInstances",
+    "ParameterKey": "DesiredCapacity",
     "ParameterValue": "3"
   },
   {
     "ParameterKey": "ImageID",
-    "ParameterValue": "ami-0323c3dd2da7fb37d"
+    "ParameterValue": "ami-0d960646974cf9e5b"
   },
   {
     "ParameterKey": "MinSize",
@@ -22,5 +22,9 @@
   {
     "ParameterKey": "MaxSize",
     "ParameterValue": "4"
+  },
+  {
+    "ParameterKey": "NodeVolumeSize",
+    "ParameterValue": "20"
   }
 ]
