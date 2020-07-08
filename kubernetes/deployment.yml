@@ -22,8 +22,13 @@ spec:
     spec:
       containers:
         - image: taha3azab/capstone-app
+          restartPolicy: Always
           imagePullPolicy: Always
           name: capstone-app
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
           ports:
             - containerPort: 80
 
