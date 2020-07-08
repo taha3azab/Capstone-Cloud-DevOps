@@ -13,9 +13,18 @@ which include:
 - Building Kubernetes clusters.
 - Building Docker containers in pipelines. 
 
-You will develop a CI/CD pipeline for micro services applications with either blue/green deployment or rolling deployment. You will also develop your Continuous Integration steps as you see fit, but must at least include typographical checking (aka “linting”). To make your project stand out, you may also choose to implement other checks such as security scanning, performance testing, integration testing, etc.!
 
-Once you have completed your Continuous Integration you will set up Continuous Deployment, which will include:
+The project uses a centralized image repository to manage images built in the project. After a clean build, images are pushed to the repository.
 
-Pushing the built Docker container(s) to the Docker repository (you can use AWS ECR, create your own custom Registry within your cluster, or another 3rd party Docker repository) ; and
-Deploying these Docker container(s) to a small Kubernetes cluster. For your Kubernetes cluster you can either use AWS Kubernetes as a Service, or build your own Kubernetes cluster. To deploy your Kubernetes cluster, use either Ansible or Cloudformation. Preferably, run these from within Jenkins as an independent pipeline.
+Execute linting step in code pipeline
+Code is checked against a linter as part of a Continuous Integration step (demonstrated w/ two screenshots)
+
+Build a Docker container in a pipeline
+The project takes a Dockerfile and creates a Docker container in the pipeline.
+
+Continuous Deployment, which includes:
+- Pushing the built Docker container(s) to the Docker repository
+- Deploying Docker container to a small Kubernetes cluster. 
+
+The project performs the correct steps to do a rolling deployment into the environment selected.
+
