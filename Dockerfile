@@ -1,7 +1,7 @@
 FROM nginx:alpine
 
 LABEL MAINTAINER Taha Azab <azab.taha@gmail.com>
-break lint docker
+
 RUN rm -rf /usr/share/nginx/html/*
 VOLUME /var/cache/nginx
 COPY app/capstone-app  /usr/share/nginx/html
