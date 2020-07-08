@@ -22,7 +22,6 @@ spec:
     spec:
       containers:
         - image: taha3azab/capstone-app
-          restartPolicy: Always
           imagePullPolicy: Always
           name: capstone-app
           resources:
